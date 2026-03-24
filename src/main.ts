@@ -10,7 +10,12 @@ async function bootstrap() {
     bufferLogs: true,
   });
   app.setGlobalPrefix('/api');
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      transform: true,
+      whitelist: true,
+    }),
+  );
 
   app.use(cookieParser());
 

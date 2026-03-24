@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import { DataSource, DataSourceOptions } from 'typeorm';
 import { SeederOptions } from 'typeorm-extension';
+import { SnakeNamingStrategy } from 'typeorm-naming-strategies';
 
 dotenv.config();
 
@@ -11,7 +12,8 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   database: process.env.DB_NAME,
   port: Number(process.env.DB_PORT),
   host: process.env.DB_HOST,
-  entities: ['dist/api/**/*.entity{.ts,.js}'],
+  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
+  // autoLoadEntities: true,
   migrations: ['dist/database/migrations/*{.ts,.js}'],
   seeds: ['dist/database/seeds/*{.ts,.js}'],
   factories: ['dist/database/factories/**/*{.ts,.js}'],
@@ -19,10 +21,10 @@ export const dataSourceOptions: DataSourceOptions & SeederOptions = {
   synchronize: process.env.DB_SYNCHRONIZE === 'true',
   logging: process.env.NODE_ENV === 'development',
   cache: true,
+  namingStrategy: new SnakeNamingStrategy(),
 };
 
 const dataSource = new DataSource(dataSourceOptions);
 console.log(dataSource.options);
-export default dataSource;
 
 dataSource.initialize();

@@ -7,6 +7,7 @@ import { AppService } from './app.service';
 
 import { dataSourceOptions } from './database.config';
 import { AuthModule } from './auth/auth.module';
+import { LocusModule } from './locus/locus.module';
 
 @Module({
   imports: [
@@ -14,8 +15,21 @@ import { AuthModule } from './auth/auth.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    TypeOrmModule.forRoot(dataSourceOptions),
+    // TypeOrmModule.forRoot(dataSourceOptions),
+    TypeOrmModule.forRoot({
+      type: 'postgres',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+
+      autoLoadEntities: true,
+
+      synchronize: false,
+    }),
     AuthModule,
+    LocusModule,
   ],
   controllers: [AppController],
   providers: [AppService],
