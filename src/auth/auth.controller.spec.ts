@@ -4,6 +4,7 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { Response } from 'express';
+import { JwtPayload, User } from '../common';
 
 const mockResponse = () =>
   ({
@@ -42,12 +43,13 @@ describe('AuthController', () => {
   describe('findUser', () => {
     it('делегирует в authService.findUser с sub из токена', () => {
       const mockUser = { id: 1, username: 'admin', role: 'admin' };
-      authService.findUser.mockReturnValue(mockUser as any);
+      authService.findUser.mockReturnValue(mockUser as User);
 
-      const req = { user: { sub: 1 } } as any;
+      const req = { user: { sub: 1 } } as Request & { user: JwtPayload };
       const result = controller.findUser(req);
 
       expect(authService.findUser).toHaveBeenCalledWith(1);
+
       expect(result).toEqual(mockUser);
     });
   });

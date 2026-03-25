@@ -6,25 +6,12 @@ import {
   UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
-import { LocusService } from './locus.service';
-import { GetLocusDto } from './dto/locus.dto';
-import { UserRole } from '../auth/auth.service';
-import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { JwtPayload } from '../shared/types';
 import { ApiOperation, ApiResponse } from '@nestjs/swagger';
 
-export interface User {
-  id: number;
-  username: string;
-  password: string;
-  role: UserRole;
-}
-
-const PREDEFINED_USERS: User[] = [
-  { id: 1, username: 'admin', password: 'admin123', role: 'admin' },
-  { id: 2, username: 'normal', password: 'normal123', role: 'normal' },
-  { id: 3, username: 'limited', password: 'limited123', role: 'limited' },
-];
+import { LocusService } from './locus.service';
+import { GetLocusDto } from './dto/locus.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { JwtPayload, PREDEFINED_USERS } from '../common';
 
 @Controller('locus')
 export class LocusController {

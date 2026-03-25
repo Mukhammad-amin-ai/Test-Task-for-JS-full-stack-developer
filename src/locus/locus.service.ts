@@ -3,13 +3,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 
 import { RncLocus } from './entity/rnc_locus.entity';
-
 import { GetLocusDto } from './dto/locus.dto';
-
-import { User } from './locus.controller';
-import { SideloadEnum } from '../shared/types';
-
-const LIMITED_REGION_IDS = [31232818, 86118093, 86696489, 88186467];
+import { LIMITED_REGION_IDS, SideloadEnum, User } from '../common';
 
 @Injectable()
 export class LocusService {

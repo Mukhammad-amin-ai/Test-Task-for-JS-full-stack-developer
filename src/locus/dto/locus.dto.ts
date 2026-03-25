@@ -2,12 +2,11 @@ import {
   IsArray,
   IsOptional,
   IsInt,
-  IsNumber,
   IsString,
   Min,
   IsEnum,
 } from 'class-validator';
-import { SideloadEnum, SortFieldEnum, SortOrderEnum } from '../../shared/types';
+import { SideloadEnum, SortFieldEnum, SortOrderEnum } from '../../common';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform, Type } from 'class-transformer';
 

@@ -12,7 +12,7 @@ import {
 import { AuthService } from './auth.service';
 
 import { Response } from 'express';
-import { JwtPayload } from '../shared/types';
+import { JwtPayload } from '../common';
 
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import {
