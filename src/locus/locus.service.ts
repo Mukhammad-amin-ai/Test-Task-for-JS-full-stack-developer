@@ -1,24 +1,21 @@
-import { ForbiddenException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 import { RncLocus } from './entity/rnc_locus.entity';
-import { RncLocusMember } from './entity/rnc_locus_member.entity';
 
 import { GetLocusDto } from './dto/locus.dto';
 
 import { User } from './locus.controller';
 import { SideloadEnum } from '../shared/types';
 
-const LIMITED_REGION_IDS = [86118093, 86696489, 88186467];
+const LIMITED_REGION_IDS = [31232818, 86118093, 86696489, 88186467];
 
 @Injectable()
 export class LocusService {
   constructor(
     @InjectRepository(RncLocus)
     private readonly locusRepository: Repository<RncLocus>,
-    @InjectRepository(RncLocusMember)
-    private readonly memberRepository: Repository<RncLocusMember>,
   ) {}
 
   async getLocus(dto: GetLocusDto, user: User) {
@@ -38,24 +35,23 @@ export class LocusService {
     const isNormal = user.role === 'normal';
     const isLimited = user.role === 'limited';
 
-    if (isNormal && include?.length) {
-      throw new ForbiddenException('normal cannot use sideload');
-    }
-
     const qb = this.locusRepository
       .createQueryBuilder('rl')
       .skip((page - 1) * limit)
       .take(limit)
       .orderBy(`rl.${sortBy}`, sortOrder as 'ASC' | 'DESC');
 
-    const needsMemberJoin =
-      regionId?.length ||
-      membershipStatus ||
-      include?.includes(SideloadEnum.LOCUS_MEMBERS) ||
-      isLimited;
-    console.log(needsMemberJoin);
-    if (needsMemberJoin) {
-      qb.leftJoinAndSelect('rl.locusMembers', 'rlm');
+    const needFilterJoin = regionId?.length || membershipStatus || isLimited;
+
+    if (needFilterJoin) {
+      qb.innerJoin('rl.locusMembers', 'filter_rlm');
+    }
+
+    const needSideload =
+      isAdmin && include?.includes(SideloadEnum.LOCUS_MEMBERS);
+
+    if (needSideload) {
+      qb.leftJoinAndSelect('rl.locusMembers', 'sideload_rlm');
     }
 
     if (id?.length) {
@@ -67,55 +63,30 @@ export class LocusService {
     }
 
     if (regionId?.length) {
-      qb.andWhere('rlm.region_id IN (:...regionId)', { regionId });
+      qb.andWhere('filter_rlm.region_id IN (:...regionId)', { regionId });
     }
 
     if (membershipStatus) {
-      qb.andWhere('rlm.membership_status = :membershipStatus', {
+      qb.andWhere('filter_rlm.membership_status = :membershipStatus', {
         membershipStatus,
       });
     }
 
     if (isLimited) {
-      qb.andWhere('rlm.region_id IN (:...allowedRegions)', {
+      qb.andWhere('filter_rlm.region_id IN (:...allowedRegions)', {
         allowedRegions: LIMITED_REGION_IDS,
       });
     }
 
     const [loci, total] = await qb.getManyAndCount();
 
-    if (isAdmin && include?.includes(SideloadEnum.LOCUS_MEMBERS)) {
-      const locusIds: number[] = loci.map((l) => l.id);
-
-      if (locusIds.length) {
-        const members = await this.memberRepository.find({
-          where: { locusId: In(locusIds) },
-        });
-
-        const membersByLocusId = members.reduce(
-          (acc, m) => {
-            if (!acc[m.locusId]) acc[m.locusId] = [];
-            acc[m.locusId].push(m);
-            return acc;
-          },
-          {} as Record<number, RncLocusMember[]>,
-        );
-
-        return loci.map((locus) => ({
-          ...locus,
-          locusMembers: membersByLocusId[locus.id] ?? [],
-        }));
-      }
-    }
-
     if (isNormal) {
       const data = loci.map((l) => {
         const copy = { ...l } as Partial<typeof l>;
-
         delete copy.locusMembers;
-
         return copy;
       });
+
       return { data, total, page, limit };
     }
 

@@ -28,8 +28,8 @@ export class GetLocusDto {
   id?: number[];
 
   @IsOptional()
-  @IsNumber()
-  assemblyId?: number;
+  @IsString()
+  assemblyId?: string;
 
   @IsOptional()
   @Transform(({ value }) => {
@@ -50,15 +50,12 @@ export class GetLocusDto {
   membershipStatus?: string;
 
   @ApiPropertyOptional({
-    description: 'Sideload related data',
+    description: 'Include locus members sideload',
     enum: SideloadEnum,
-    isArray: true,
   })
   @IsOptional()
-  @IsArray()
-  @IsEnum(SideloadEnum, { each: true })
-  @Transform(({ value }) => (Array.isArray(value) ? value : [value]))
-  include?: SideloadEnum[];
+  @IsEnum(SideloadEnum)
+  include?: SideloadEnum;
 
   @IsOptional()
   @IsInt()
