@@ -5,7 +5,6 @@ import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 
-import { dataSourceOptions } from './database.config';
 import { AuthModule } from './auth/auth.module';
 import { LocusModule } from './locus/locus.module';
 
@@ -15,7 +14,6 @@ import { LocusModule } from './locus/locus.module';
       envFilePath: '.env',
       isGlobal: true,
     }),
-    // TypeOrmModule.forRoot(dataSourceOptions),
     TypeOrmModule.forRoot({
       type: 'postgres',
       host: process.env.DB_HOST,
