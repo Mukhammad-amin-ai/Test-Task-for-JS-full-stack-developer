@@ -60,13 +60,13 @@ export class GetLocusDto {
   @IsOptional()
   @IsInt()
   @Min(1)
-  @IsNumber()
+  @Type(() => Number)
   page?: number = 1;
 
   @IsOptional()
   @IsInt()
   @Min(1)
-  @IsNumber()
+  @Type(() => Number)
   limit?: number = 1000;
 
   @IsOptional()
